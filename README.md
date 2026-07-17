@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 10">
   <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
-  <img src="https://img.shields.io/badge/CSS-Vanilla_Premium-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="Vanilla CSS">
+  <img src="https://img.shields.io/badge/CSS-Bootstrap_&_Vanilla-1572B6?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap & CSS Vanilla">
   <img src="https://img.shields.io/badge/PHP-8.1.25-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1">
 </p>
 
@@ -52,11 +52,27 @@ Cada vez que un ticket es modificado (creación, cambio de prioridad, asignació
 
 ---
 
+## 📸 Vista Previa (Capturas de Pantalla)
+
+### Inicio de Sesión
+![Inicio de Sesión](public/assets/screenshots/login.png)
+
+### Panel de Administración (KPIs, Reasignador y Auditoría)
+![Panel de Administración](public/assets/screenshots/admin.png)
+
+### Panel Técnico (Bandeja de Carga y Acciones de Soporte)
+![Panel Técnico](public/assets/screenshots/tecnico.png)
+
+### Detalle de Ticket (Vista del Cliente con Evidencia e Imágenes)
+![Detalle de Ticket](public/assets/screenshots/cliente.png)
+
+---
+
 ## 🛠️ Tecnologías y Diseño Estético
 
 - **Framework**: Laravel 10 (con PHP 8.1.25).
 - **Base de Datos**: MySQL (Mapeada mediante modelos Eloquent con nombres de tablas en español y optimizaciones de integridad referencial).
-- **Diseño Front-End (CSS Vanilla Premium)**: Interfaz de alta fidelidad con tema oscuro "Obsidian Dark Mode", gradientes sutiles de acento de colores de estado, efectos de vidrio esmerilado (Glassmorphism) y transiciones animadas fluidas sin depender de frameworks CSS pesados.
+- **Diseño Front-End (Bootstrap + CSS Vanilla)**: Interfaz de alta fidelidad con tema oscuro "Obsidian Dark Mode", gradientes sutiles de acento de colores de estado, efectos de vidrio esmerilado (Glassmorphism) y transiciones animadas fluidas de alto rendimiento.
 
 ---
 
@@ -122,3 +138,17 @@ El sistema incluye usuarios pre-cargados para validar los flujos de trabajo de i
 | **Elena Torres** | `Técnico` | `elena.torres@helpdesk.com` | Técnico del departamento de Infraestructura. |
 | **Roberto Sanchez** | `Cliente` | `roberto@empresa.com` | Empleado del área de contabilidad (puede reportar tickets). |
 | **Maria Lopez** | `Cliente` | `maria@empresa.com` | Empleado del departamento de Recursos Humanos. |
+
+---
+
+## 👤 Autor
+
+Desarrollado con dedicación por **David Valdés V.**
+- **LinkedIn**: [David Valdés V.](https://linkedin.com)
+- **GitHub**: [@DavidValdesV](https://github.com/DavidValdesV)
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de código abierto bajo los términos de la [Licencia MIT](LICENSE) de software libre.
