@@ -144,7 +144,7 @@ El sistema incluye usuarios pre-cargados para validar los flujos de trabajo de i
 ## 👤 Autor
 
 Desarrollado con dedicación por **David Valdés V.**
-- **LinkedIn**: [David Valdés V.]([https://linkedin.com](https://www.linkedin.com/in/david-valdesv/))
+- **LinkedIn**: [David Valdés V.](https://www.linkedin.com/in/david-valdesv/)
 - **GitHub**: [@DavidValdesV](https://github.com/DavidValdesV)
 
 ---
