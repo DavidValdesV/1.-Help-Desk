@@ -1,10 +1,10 @@
 # IT Help Desk - Sistema de Gestión de Tickets de Soporte TI
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 10">
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 12">
   <img src="https://img.shields.io/badge/MySQL-8.0%2B-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
-  <img src="https://img.shields.io/badge/CSS-Bootstrap_&_Vanilla-1572B6?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap & CSS Vanilla">
-  <img src="https://img.shields.io/badge/PHP-8.1.25-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.1">
+  <img src="https://img.shields.io/badge/CSS-Vanilla-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS Vanilla">
+  <img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+">
 </p>
 
 Una plataforma web interna para la gestión, priorización, asignación automática y auditoría de incidencias técnicas en infraestructura, hardware y software. Diseñada específicamente para conectar las necesidades del negocio con una resolución ágil de soporte TI.
@@ -70,17 +70,19 @@ Cada vez que un ticket es modificado (creación, cambio de prioridad, asignació
 
 ## 🛠️ Tecnologías y Diseño Estético
 
-- **Framework**: Laravel 10 (con PHP 8.1.25).
+- **Framework**: Laravel 12 (PHP 8.2 o superior; la imagen Docker usa PHP 8.4.27; versiones seguras: 8.2.35, 8.3.36, 8.4.27 u 8.5.12 o superiores) con Laravel Sanctum 4.
+- **Front-End tooling**: Vite 8 con `laravel-vite-plugin` (Node.js 20.19 o superior; la imagen Docker usa Node 22).
 - **Base de Datos**: MySQL (Mapeada mediante modelos Eloquent con nombres de tablas en español y optimizaciones de integridad referencial).
-- **Diseño Front-End (Bootstrap + CSS Vanilla)**: Interfaz de alta fidelidad con tema oscuro "Obsidian Dark Mode", gradientes sutiles de acento de colores de estado, efectos de vidrio esmerilado (Glassmorphism) y transiciones animadas fluidas de alto rendimiento.
+- **Diseño Front-End (CSS Vanilla)**: Interfaz de alta fidelidad con tema oscuro "Obsidian Dark Mode", gradientes sutiles de acento de colores de estado, efectos de vidrio esmerilado (Glassmorphism) y transiciones animadas fluidas de alto rendimiento.
 
 ---
 
 ## 🚀 Guía de Instalación y Despliegue
 
 ### Requisitos Previos
-- **PHP**: >= 8.1
-- **Composer**
+- **PHP**: >= 8.2 (extensiones `pdo_mysql`, `mbstring` y `curl`)
+- **Composer** 2
+- **Node.js** >= 20.19 y npm (para compilar los assets con Vite)
 - **Servidor MySQL** (WAMP/XAMPP recomendados)
 
 ### Paso 1: Clonar y Descargar Dependencias
@@ -90,6 +92,9 @@ cd 1.--Help-Desk
 
 # Instalar dependencias de PHP
 composer install
+
+# Instalar y compilar assets
+npm ci && npm run build
 ```
 
 ### Paso 2: Configuración del Entorno
@@ -123,6 +128,13 @@ Inicia el servidor local de desarrollo:
 php artisan serve
 ```
 Abre en tu navegador la dirección: **http://127.0.0.1:8000**
+
+### Alternativa: Docker
+Con Docker Compose se levantan la aplicación (PHP 8.4.27 + Apache) y MySQL 8.4 (LTS):
+```bash
+docker compose up --build
+```
+La app queda en **http://localhost:8000** y MySQL en el puerto `3307`. Define en tu `.env` los valores `APP_KEY`, `DOCKER_DB_PASSWORD` y `DOCKER_DB_ROOT_PASSWORD` (ver `.env.example`), e importa `database/helpdesk_schema.sql` en la base de datos `helpdesk_db`.
 
 ---
 

@@ -24,7 +24,11 @@ class TicketService
 
             // Generar número correlativo de ticket: TKT-YYYY-0001
             $year = now()->format('Y');
-            $count = Ticket::whereYear('created_at', now()->year)->count() + 1;
+            $ultimoNumero = Ticket::where('numero_ticket', 'like', "TKT-{$year}-%")
+                ->lockForUpdate()
+                ->orderByDesc('numero_ticket')
+                ->value('numero_ticket');
+            $count = $ultimoNumero ? ((int) substr($ultimoNumero, -4)) + 1 : 1;
             $numeroTicket = sprintf("TKT-%s-%04d", $year, $count);
 
             // Buscar técnico con la menor carga de trabajo activa

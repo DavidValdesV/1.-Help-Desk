@@ -98,7 +98,7 @@ class TicketController extends Controller
             'descripcion' => 'required|string|min:15',
             'categoria_id' => 'required|exists:categorias,id',
             'prioridad_id' => 'required|exists:prioridades,id',
-            'adjuntos.*' => 'nullable|file|max:10240', // Max 10MB por archivo
+            'adjuntos.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,txt,doc,docx,xls,xlsx,zip', // Max 10MB por archivo
         ], [
             'titulo.required' => 'El asunto del ticket es obligatorio.',
             'titulo.min' => 'El asunto del ticket debe tener al menos 8 caracteres para ser descriptivo.',
@@ -107,6 +107,7 @@ class TicketController extends Controller
             'categoria_id.required' => 'La categoría es obligatoria.',
             'prioridad_id.required' => 'La prioridad es obligatoria.',
             'adjuntos.*.max' => 'Los archivos adjuntos no deben superar los 10MB.',
+            'adjuntos.*.mimes' => 'Tipo de archivo no permitido. Usa imágenes, PDF, texto, Office o ZIP.',
         ]);
 
         $archivos = $request->file('adjuntos', []);
