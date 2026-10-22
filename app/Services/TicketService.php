@@ -37,6 +37,8 @@ class TicketService
                 ->where('usuarios.rol', 'tecnico')
                 ->where('usuarios.activo', 1)
                 ->orderBy('carga_tecnicos.tickets_activos', 'asc')
+                ->orderBy('usuarios.id')
+                ->lockForUpdate()
                 ->select('usuarios.id', 'usuarios.nombre', 'carga_tecnicos.tickets_activos')
                 ->first();
 

@@ -150,6 +150,8 @@ El sistema incluye usuarios pre-cargados para validar los flujos de trabajo de i
 | **Elena Torres** | `Técnico` | `elena.torres@helpdesk.com` | Técnico del departamento de Infraestructura. |
 | **Roberto Sanchez** | `Cliente` | `roberto@empresa.com` | Empleado del área de contabilidad (puede reportar tickets). |
 | **Maria Lopez** | `Cliente` | `maria@empresa.com` | Empleado del departamento de Recursos Humanos. |
+| **Jorge Ramirez** | `Cliente` | `jorge@empresa.com` | Empleado del departamento de Ventas. |
+| **Patricia Vega** | `Cliente` | `patricia@empresa.com` | Empleada del departamento de Logística. |
 
 ---
 
