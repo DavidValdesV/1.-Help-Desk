@@ -343,6 +343,34 @@ a:hover {
     color: var(--text-muted);
 }
 
+.btn-copy-cred {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.btn-copy-cred:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary);
+    color: var(--text-white);
+}
+
+.btn-copy-cred.is-copied {
+    background: rgba(52, 211, 153, 0.15);
+    border-color: var(--clr-abierto);
+    color: var(--clr-abierto);
+}
+
 /* Form Styles */
 .form-group {
     margin-bottom: 1.5rem;

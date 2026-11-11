@@ -45,18 +45,36 @@
             </button>
         </form>
 
-        <!-- Hints block for testing (only in local/development) -->
-        @if(app()->environment('local'))
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: var(--text-muted);">
-                <p style="font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;"><i class="fa-solid fa-info-circle"></i> Usuarios de Prueba:</p>
-                <ul style="list-style-type: none; padding-left: 0;">
-                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--primary);">Administrador:</strong> admin@helpdesk.com</li>
-                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-progreso);">Técnico:</strong> ana.garcia@helpdesk.com</li>
-                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-abierto);">Cliente:</strong> roberto@empresa.com</li>
-                    <li><strong>Contraseña común:</strong> password</li>
-                </ul>
-            </div>
-        @endif
+        <!-- Hints block for testing -->
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: var(--text-muted);">
+            <p style="font-weight: 700; color: var(--text-main); margin-bottom: 0.65rem;"><i class="fa-solid fa-info-circle"></i> Usuarios de Prueba:</p>
+            <ul style="list-style-type: none; padding-left: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                    <span><strong style="color: var(--primary);">Administrador:</strong> admin@helpdesk.com</span>
+                    <button type="button" class="btn-copy-cred" data-copy="admin@helpdesk.com" data-fill-email="admin@helpdesk.com" title="Copiar correo y rellenar">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </li>
+                <li style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                    <span><strong style="color: var(--clr-progreso);">Técnico:</strong> ana.garcia@helpdesk.com</span>
+                    <button type="button" class="btn-copy-cred" data-copy="ana.garcia@helpdesk.com" data-fill-email="ana.garcia@helpdesk.com" title="Copiar correo y rellenar">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </li>
+                <li style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                    <span><strong style="color: var(--clr-abierto);">Cliente:</strong> roberto@empresa.com</span>
+                    <button type="button" class="btn-copy-cred" data-copy="roberto@empresa.com" data-fill-email="roberto@empresa.com" title="Copiar correo y rellenar">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </li>
+                <li style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                    <span><strong>Contraseña común:</strong> password</span>
+                    <button type="button" class="btn-copy-cred" data-copy="password" data-fill-pass="password" title="Copiar contraseña y rellenar">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -64,19 +82,46 @@
     document.addEventListener('DOMContentLoaded', function () {
         const toggle = document.getElementById('togglePassword');
         const input = document.getElementById('password');
-        if (!toggle || !input) return;
+        const emailInput = document.getElementById('email');
 
-        toggle.addEventListener('click', function () {
-            const isHidden = input.type === 'password';
-            input.type = isHidden ? 'text' : 'password';
+        if (toggle && input) {
+            toggle.addEventListener('click', function () {
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
 
-            const icon = toggle.querySelector('i');
-            icon.classList.toggle('fa-eye', !isHidden);
-            icon.classList.toggle('fa-eye-slash', isHidden);
+                const icon = toggle.querySelector('i');
+                icon.classList.toggle('fa-eye', !isHidden);
+                icon.classList.toggle('fa-eye-slash', isHidden);
 
-            const label = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
-            toggle.setAttribute('aria-label', label);
-            toggle.setAttribute('title', label);
+                const label = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
+                toggle.setAttribute('aria-label', label);
+                toggle.setAttribute('title', label);
+            });
+        }
+
+        document.querySelectorAll('.btn-copy-cred').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const text = btn.dataset.copy;
+                if (navigator.clipboard && text) {
+                    navigator.clipboard.writeText(text).catch(function () {});
+                }
+
+                if (btn.dataset.fillEmail && emailInput) {
+                    emailInput.value = btn.dataset.fillEmail;
+                }
+                if (btn.dataset.fillPass && input) {
+                    input.value = btn.dataset.fillPass;
+                }
+
+                const icon = btn.querySelector('i');
+                icon.className = 'fa-solid fa-check';
+                btn.classList.add('is-copied');
+
+                setTimeout(function () {
+                    icon.className = 'fa-regular fa-copy';
+                    btn.classList.remove('is-copied');
+                }, 1400);
+            });
         });
     });
 </script>
