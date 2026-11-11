@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\ComentarioTicket;
+use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,7 +13,7 @@ class CommentController extends Controller
     /**
      * Guarda un comentario en el ticket.
      */
-    public function store(Request $request, Ticket $ticket)
+    public function store(Request $request, Ticket $ticket, TicketService $ticketService)
     {
         $user = Auth::user();
 
@@ -20,6 +21,9 @@ class CommentController extends Controller
         if ($user->esCliente() && $ticket->usuario_id !== $user->id) {
             abort(403, 'No tienes permiso para comentar en este ticket.');
         }
+
+        // Respaldo: si el plazo de cierre automático ya expiró, el ticket queda cerrado
+        $ticketService->cerrarSiExpirado($ticket);
 
         // Si el ticket está cerrado, el cliente no puede comentar
         if ($ticket->estado === 'cerrado' && $user->esCliente()) {
@@ -46,6 +50,14 @@ class CommentController extends Controller
             'cuerpo' => $request->cuerpo,
             'es_interno' => $esInterno,
         ]);
+
+        // Si el cliente responde a un ticket resuelto (dentro del plazo de cierre automático),
+        // el ticket se reabre para que el técnico lo revise nuevamente.
+        if ($ticket->estado === 'resuelto' && $user->id === $ticket->usuario_id) {
+            $ticketService->cambiarEstado($ticket, 'en_progreso', $user, null, $request->ip());
+
+            return back()->with('success', 'Comentario publicado. El ticket fue reabierto para que soporte lo revise.');
+        }
 
         $mensaje = $esInterno ? 'Nota interna guardada con éxito.' : 'Comentario publicado con éxito.';
 

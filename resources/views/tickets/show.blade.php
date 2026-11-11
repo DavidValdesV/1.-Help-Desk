@@ -106,6 +106,26 @@
             </h3>
 
             <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2rem;">
+                <!-- Auto-close countdown (only while the ticket is resolved) -->
+                @if($fechaAutoCierre = $ticket->fechaAutoCierre())
+                    <div id="auto-cierre-banner" data-cierre="{{ $fechaAutoCierre->toIso8601String() }}" data-ahora="{{ now()->toIso8601String() }}"
+                        style="display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.3); border-left: 4px solid var(--clr-espera);">
+                        <i class="fa-solid fa-hourglass-half" style="color: var(--clr-espera); font-size: 1.3rem;"></i>
+                        <div style="flex-grow: 1; font-size: 0.9rem; line-height: 1.5;">
+                            @if(auth()->id() === $ticket->usuario_id)
+                                <strong style="color: var(--text-white);">¿Se solucionó tu problema?</strong>
+                                Si no respondes, este ticket se cerrará automáticamente en
+                            @else
+                                <strong style="color: var(--text-white);">Esperando confirmación del cliente.</strong>
+                                El ticket se cerrará automáticamente si no hay respuesta en
+                            @endif
+                            <strong id="auto-cierre-contador" style="color: var(--clr-espera); font-variant-numeric: tabular-nums;">--:--</strong>.
+                            @if(auth()->id() === $ticket->usuario_id)
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Si el problema persiste, escribe un comentario abajo y el ticket se reabrirá.</div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
                 <!-- System generated resolution notes (if resolved) -->
                 @if($ticket->notas_resolucion)
                     <div class="chat-bubble" style="background: rgba(52, 211, 153, 0.05); border: 1px solid rgba(52, 211, 153, 0.25); border-left: 4px solid var(--clr-abierto);">
@@ -154,7 +174,7 @@
                         <textarea name="cuerpo" id="cuerpo" rows="3" class="form-control" placeholder="Escribe tu respuesta aquí..." required></textarea>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                    <div class="comment-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem;">
                         <div>
                             <!-- Checkbox for internal note (Only visible for tech/admin) -->
                             @if(!auth()->user()->esCliente())
@@ -377,5 +397,32 @@
             textarea.removeAttribute('required');
         }
     }
+
+    // Cuenta regresiva del cierre automático de tickets resueltos
+    (function () {
+        const banner = document.getElementById('auto-cierre-banner');
+        if (!banner) return;
+
+        const contador = document.getElementById('auto-cierre-contador');
+        const cierre = new Date(banner.dataset.cierre).getTime();
+        // Diferencia entre el reloj del servidor y el del navegador
+        const desfase = new Date(banner.dataset.ahora).getTime() - Date.now();
+
+        function actualizar() {
+            const restante = Math.max(0, Math.floor((cierre - (Date.now() + desfase)) / 1000));
+            const min = String(Math.floor(restante / 60)).padStart(2, '0');
+            const seg = String(restante % 60).padStart(2, '0');
+            contador.textContent = `${min}:${seg}`;
+
+            if (restante === 0) {
+                clearInterval(intervalo);
+                // Recargar para reflejar el cierre (el servidor cierra el ticket al cargarlo)
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        }
+
+        const intervalo = setInterval(actualizar, 1000);
+        actualizar();
+    })();
 </script>
 @endsection

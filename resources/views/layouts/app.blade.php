@@ -11,18 +11,40 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style System -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     @yield('head')
 </head>
 <body>
 
     @auth
     <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="brand">
+        <!-- Mobile Top Bar (visible only on small screens / high zoom) -->
+        <header class="mobile-topbar">
+            <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-controls="app-sidebar" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand brand-mobile">
                 <i class="fa-solid fa-headset"></i>
                 <span>Help Desk TI</span>
+            </div>
+            <div class="user-avatar user-avatar-sm" title="{{ auth()->user()->nombre }}">
+                {{ strtoupper(substr(auth()->user()->nombre, 0, 1)) }}
+            </div>
+        </header>
+
+        <!-- Overlay behind the mobile drawer -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Help Desk TI</span>
+                </div>
+                <button type="button" class="menu-close" id="menu-close" aria-label="Cerrar menú">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
             <nav class="sidebar-nav">
@@ -98,6 +120,36 @@
     </div>
     @else
         @yield('content')
+    @endauth
+
+    @auth
+    <script>
+        // Menú lateral deslizable para móviles / zoom alto
+        (function () {
+            const body = document.body;
+            const sidebar = document.getElementById('app-sidebar');
+            const toggle = document.getElementById('menu-toggle');
+            const closeBtn = document.getElementById('menu-close');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (!sidebar || !toggle) return;
+
+            function abrir() {
+                body.classList.add('sidebar-open');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+            function cerrar() {
+                body.classList.remove('sidebar-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', abrir);
+            closeBtn && closeBtn.addEventListener('click', cerrar);
+            overlay && overlay.addEventListener('click', cerrar);
+            sidebar.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', cerrar));
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+            window.addEventListener('resize', () => { if (window.innerWidth > 1024) cerrar(); });
+        })();
+    </script>
     @endauth
 
     @yield('scripts')

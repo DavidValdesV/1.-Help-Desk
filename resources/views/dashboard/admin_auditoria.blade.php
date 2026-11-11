@@ -92,7 +92,7 @@
 
         <!-- Pagination -->
         @if($auditorias->hasPages())
-            <div style="padding: 1.25rem 1.75rem; border-top: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
+            <div class="pagination-bar" style="padding: 1.25rem 1.75rem; border-top: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-size: 0.85rem; color: var(--text-muted);">
                     Mostrando {{ $auditorias->firstItem() }} al {{ $auditorias->lastItem() }} de {{ $auditorias->total() }} registros de auditoría
                 </div>

@@ -120,7 +120,7 @@ class TicketController extends Controller
     /**
      * Muestra el detalle de un ticket.
      */
-    public function show(Ticket $ticket)
+    public function show(Ticket $ticket, TicketService $ticketService)
     {
         $user = Auth::user();
 
@@ -128,6 +128,9 @@ class TicketController extends Controller
         if ($user->esCliente() && $ticket->usuario_id !== $user->id) {
             abort(403, 'No tienes permiso para ver este ticket.');
         }
+
+        // Respaldo: si el plazo de cierre automático ya expiró, cerrar el ticket ahora
+        $ticketService->cerrarSiExpirado($ticket);
 
         // Cargar relaciones
         $ticket->load([

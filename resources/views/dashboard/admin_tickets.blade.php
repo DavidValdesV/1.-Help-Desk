@@ -136,7 +136,7 @@
 
         <!-- Pagination -->
         @if($tickets->hasPages())
-            <div style="padding: 1rem 1.75rem; border-top: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
+            <div class="pagination-bar" style="padding: 1rem 1.75rem; border-top: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-size: 0.85rem; color: var(--text-muted);">
                     Mostrando {{ $tickets->firstItem() }} al {{ $tickets->lastItem() }} de {{ $tickets->total() }} tickets en total
                 </div>

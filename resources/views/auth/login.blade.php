@@ -30,14 +30,13 @@
 
             <div class="form-group">
                 <label for="password" class="form-label">Contraseña</label>
-                <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
-            </div>
-
-            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
-                <label class="form-check">
-                    <input type="checkbox" name="remember" class="form-check-input">
-                    <span style="font-size: 0.85rem; color: var(--text-muted);">Recordarme</span>
-                </label>
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required style="padding-right: 2.75rem;">
+                    <button type="button" id="togglePassword" aria-label="Mostrar contraseña" title="Mostrar contraseña"
+                        style="position: absolute; top: 50%; right: 0.75rem; transform: translateY(-50%); background: none; border: none; padding: 0; cursor: pointer; color: var(--text-muted); font-size: 1rem; line-height: 1;">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
@@ -58,4 +57,25 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggle = document.getElementById('togglePassword');
+        const input = document.getElementById('password');
+        if (!toggle || !input) return;
+
+        toggle.addEventListener('click', function () {
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+
+            const icon = toggle.querySelector('i');
+            icon.classList.toggle('fa-eye', !isHidden);
+            icon.classList.toggle('fa-eye-slash', isHidden);
+
+            const label = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+        });
+    });
+</script>
 @endsection

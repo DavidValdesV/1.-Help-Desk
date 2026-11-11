@@ -13,6 +13,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+
+        // Cierre automático de tickets resueltos sin respuesta del cliente
+        $schedule->command('tickets:cerrar-resueltos')
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**
