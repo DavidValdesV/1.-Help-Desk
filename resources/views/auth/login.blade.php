@@ -45,16 +45,18 @@
             </button>
         </form>
 
-        <!-- Hints block for testing -->
-        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: var(--text-muted);">
-            <p style="font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;"><i class="fa-solid fa-info-circle"></i> Usuarios de Prueba:</p>
-            <ul style="list-style-type: none; padding-left: 0;">
-                <li style="margin-bottom: 0.25rem;"><strong style="color: var(--primary);">Administrador:</strong> admin@helpdesk.com</li>
-                <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-progreso);">Técnico:</strong> ana.garcia@helpdesk.com</li>
-                <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-abierto);">Cliente:</strong> roberto@empresa.com</li>
-                <li><strong>Contraseña común:</strong> password</li>
-            </ul>
-        </div>
+        <!-- Hints block for testing (only in local/development) -->
+        @if(app()->environment('local'))
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.8rem; color: var(--text-muted);">
+                <p style="font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;"><i class="fa-solid fa-info-circle"></i> Usuarios de Prueba:</p>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--primary);">Administrador:</strong> admin@helpdesk.com</li>
+                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-progreso);">Técnico:</strong> ana.garcia@helpdesk.com</li>
+                    <li style="margin-bottom: 0.25rem;"><strong style="color: var(--clr-abierto);">Cliente:</strong> roberto@empresa.com</li>
+                    <li><strong>Contraseña común:</strong> password</li>
+                </ul>
+            </div>
+        @endif
     </div>
 </div>
 
