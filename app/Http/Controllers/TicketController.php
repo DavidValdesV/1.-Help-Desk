@@ -101,6 +101,7 @@ class TicketController extends Controller
             'descripcion' => 'required|string|min:15',
             'categoria_id' => 'required|exists:categorias,id',
             'prioridad_id' => 'required|exists:prioridades,id',
+            'adjuntos' => 'nullable|array|max:5',
             'adjuntos.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,txt,doc,docx,xls,xlsx,zip', // Max 10MB por archivo
         ], [
             'titulo.required' => 'El asunto del ticket es obligatorio.',
@@ -109,6 +110,7 @@ class TicketController extends Controller
             'descripcion.min' => 'Describe el problema con mayor detalle (mínimo 15 caracteres).',
             'categoria_id.required' => 'La categoría es obligatoria.',
             'prioridad_id.required' => 'La prioridad es obligatoria.',
+            'adjuntos.max' => 'Solo puedes adjuntar un máximo de 5 archivos por ticket.',
             'adjuntos.*.max' => 'Los archivos adjuntos no deben superar los 10MB.',
             'adjuntos.*.mimes' => 'Tipo de archivo no permitido. Usa imágenes, PDF, texto, Office o ZIP.',
         ]);

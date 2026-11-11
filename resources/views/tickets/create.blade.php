@@ -79,13 +79,13 @@
 
         <div class="form-group">
             <label for="adjuntos" class="form-label">Archivos Adjuntos (Capturas de pantalla, archivos de log...)</label>
-            <input type="file" name="adjuntos[]" id="adjuntos" class="form-control @error('adjuntos.*') is-invalid @enderror" multiple style="padding: 0.65rem;">
+            <input type="file" name="adjuntos[]" id="adjuntos" class="form-control @if($errors->has('adjuntos') || $errors->has('adjuntos.*')) is-invalid @endif" multiple style="padding: 0.65rem;">
             <div class="field-feedback-row">
-                @error('adjuntos.*')
-                    <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ $message }}</span>
+                @if($errors->has('adjuntos') || $errors->has('adjuntos.*'))
+                    <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ $errors->first('adjuntos') ?: $errors->first('adjuntos.*') }}</span>
                 @else
-                    <span style="color: var(--text-muted);">Puedes seleccionar múltiples archivos. Máximo 10MB por archivo.</span>
-                @enderror
+                    <span style="color: var(--text-muted);">Puedes adjuntar hasta 5 archivos (máximo 10MB por archivo).</span>
+                @endif
             </div>
         </div>
 

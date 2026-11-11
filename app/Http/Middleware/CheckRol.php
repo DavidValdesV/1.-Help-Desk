@@ -22,6 +22,9 @@ class CheckRol
         // Si el usuario no está activo, cerrar sesión e ir al login
         if (!$user->activo) {
             Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
             return redirect()->route('login')->withErrors([
                 'email' => 'Tu cuenta ha sido desactivada.',
             ]);
