@@ -375,6 +375,48 @@ a:hover {
     background: rgba(17, 24, 39, 0.8);
 }
 
+.form-control.is-invalid {
+    border-color: var(--clr-critica);
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+.field-feedback-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+}
+
+.field-error {
+    color: var(--clr-critica);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.char-counter {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color 0.2s ease;
+}
+
+.char-counter.is-pending {
+    color: var(--clr-media);
+}
+
+.char-counter.is-valid {
+    color: var(--clr-abierto);
+}
+
 .form-check {
     display: flex;
     align-items: center;
@@ -428,6 +470,35 @@ a:hover {
 
 .btn-block {
     width: 100%;
+}
+
+/* Loading state (evita envíos duplicados) */
+.btn.is-loading,
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.btn-spinner {
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+    animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Dashboard Metrics / KPIs Grid */

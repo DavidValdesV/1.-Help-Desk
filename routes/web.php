@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Rutas comunes para visualización y comentarios
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::get('/adjuntos/{adjunto}', [TicketController::class, 'verAdjunto'])->name('tickets.adjunto');
     Route::post('/tickets/{ticket}/comentarios', [CommentController::class, 'store'])->name('comments.store');
     Route::post('/tickets/{ticket}/prioridad', [TicketController::class, 'updatePrioridad'])->name('tickets.updatePrioridad');
 

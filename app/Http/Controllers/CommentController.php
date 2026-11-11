@@ -17,8 +17,8 @@ class CommentController extends Controller
     {
         $user = Auth::user();
 
-        // Validar acceso del cliente al ticket
-        if ($user->esCliente() && $ticket->usuario_id !== $user->id) {
+        // Validar acceso del cliente o técnico asignado al ticket
+        if (!$ticket->usuarioPuedeAcceder($user)) {
             abort(403, 'No tienes permiso para comentar en este ticket.');
         }
 

@@ -56,11 +56,11 @@ class AdminController extends Controller
 
         $tecnicoId = $request->tecnico_id;
         
-        // Si se selecciona técnico, validar que tenga el rol correspondiente
+        // Si se selecciona técnico, validar que tenga el rol correspondiente y esté activo
         if ($tecnicoId) {
             $tecnico = User::findOrFail($tecnicoId);
-            if (!$tecnico->esTecnico()) {
-                return back()->withErrors(['tecnico_id' => 'El usuario seleccionado debe ser un técnico.']);
+            if (!$tecnico->esTecnico() || !$tecnico->activo) {
+                return back()->withErrors(['tecnico_id' => 'El usuario seleccionado debe ser un técnico activo.']);
             }
         }
 

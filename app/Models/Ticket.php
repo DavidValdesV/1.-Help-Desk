@@ -91,6 +91,24 @@ class Ticket extends Model
     }
 
     /**
+     * Verifica si el usuario dado tiene permiso para acceder/interactuar con este ticket.
+     * - Administradores: acceso total.
+     * - Técnicos: solo tickets asignados a ellos.
+     * - Clientes: solo tickets creados por ellos.
+     */
+    public function usuarioPuedeAcceder(User $user): bool
+    {
+        if ($user->esAdmin()) {
+            return true;
+        }
+        if ($user->esTecnico()) {
+            return $this->asignado_a === $user->id;
+        }
+
+        return $this->usuario_id === $user->id;
+    }
+
+    /**
      * Verifica si el ticket está vencido (SLA superado).
      */
     public function estaVencido(): bool

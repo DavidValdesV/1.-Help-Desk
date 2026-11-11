@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use App\Models\ArchivoAdjuntoTicket;
 use App\Models\Categoria;
 use App\Models\Prioridad;
 use App\Models\User;
 use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
@@ -98,6 +101,7 @@ class TicketController extends Controller
             'descripcion' => 'required|string|min:15',
             'categoria_id' => 'required|exists:categorias,id',
             'prioridad_id' => 'required|exists:prioridades,id',
+            'adjuntos' => 'nullable|array|max:5',
             'adjuntos.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,txt,doc,docx,xls,xlsx,zip', // Max 10MB por archivo
         ], [
             'titulo.required' => 'El asunto del ticket es obligatorio.',
@@ -106,12 +110,27 @@ class TicketController extends Controller
             'descripcion.min' => 'Describe el problema con mayor detalle (mínimo 15 caracteres).',
             'categoria_id.required' => 'La categoría es obligatoria.',
             'prioridad_id.required' => 'La prioridad es obligatoria.',
+            'adjuntos.max' => 'Solo puedes adjuntar un máximo de 5 archivos por ticket.',
             'adjuntos.*.max' => 'Los archivos adjuntos no deben superar los 10MB.',
             'adjuntos.*.mimes' => 'Tipo de archivo no permitido. Usa imágenes, PDF, texto, Office o ZIP.',
         ]);
 
         $archivos = $request->file('adjuntos', []);
-        $ticket = $ticketService->crearTicket($data, Auth::user(), $archivos, $request->ip());
+        $user = Auth::user();
+
+        // Bloqueo atómico para evitar la creación de tickets duplicados por envíos concurrentes
+        $lock = Cache::lock('crear_ticket_usuario_' . $user->id, 10);
+        if (!$lock->get()) {
+            return back()->withInput()->withErrors([
+                'titulo' => 'Ya se está procesando tu solicitud. Por favor, espera unos segundos.',
+            ]);
+        }
+
+        try {
+            $ticket = $ticketService->crearTicket($data, $user, $archivos, $request->ip());
+        } finally {
+            $lock->release();
+        }
 
         return redirect()->route('tickets.show', $ticket->id)
             ->with('success', "Ticket {$ticket->numero_ticket} creado con éxito y asignado al soporte.");
@@ -124,8 +143,8 @@ class TicketController extends Controller
     {
         $user = Auth::user();
 
-        // Validar acceso del cliente
-        if ($user->esCliente() && $ticket->usuario_id !== $user->id) {
+        // Validar acceso del cliente o técnico asignado
+        if (!$ticket->usuarioPuedeAcceder($user)) {
             abort(403, 'No tienes permiso para ver este ticket.');
         }
 
@@ -205,6 +224,10 @@ class TicketController extends Controller
             abort(403, 'No tienes autorización para cambiar la prioridad.');
         }
 
+        if ($user->esTecnico() && $ticket->asignado_a !== $user->id) {
+            abort(403, 'Solo el técnico asignado puede cambiar la prioridad de este ticket.');
+        }
+
         $request->validate([
             'prioridad_id' => 'required|exists:prioridades,id',
         ]);
@@ -212,5 +235,32 @@ class TicketController extends Controller
         $ticketService->cambiarPrioridad($ticket, $request->prioridad_id, $user, $request->ip());
 
         return back()->with('success', 'La prioridad del ticket y el tiempo límite (SLA) han sido actualizados correctamente.');
+    }
+
+    /**
+     * Sirve de forma autenticada y autorizada un archivo adjunto del ticket.
+     */
+    public function verAdjunto(ArchivoAdjuntoTicket $adjunto)
+    {
+        $user = Auth::user();
+        $ticket = $adjunto->ticket;
+
+        if (!$ticket || !$ticket->usuarioPuedeAcceder($user)) {
+            abort(403, 'No tienes permiso para acceder a este archivo adjunto.');
+        }
+
+        // Buscar primero en el almacenamiento privado ('local') y luego en 'public' como respaldo para adjuntos previos
+        if (Storage::disk('local')->exists($adjunto->ruta)) {
+            $path = Storage::disk('local')->path($adjunto->ruta);
+        } elseif (Storage::disk('public')->exists($adjunto->ruta)) {
+            $path = Storage::disk('public')->path($adjunto->ruta);
+        } else {
+            abort(404, 'El archivo adjunto no se encuentra disponible.');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => $adjunto->tipo_mime ?: 'application/octet-stream',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

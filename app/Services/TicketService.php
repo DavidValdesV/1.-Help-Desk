@@ -94,10 +94,10 @@ class TicketService
                 ]);
             }
 
-            // Guardar archivos adjuntos si los hay
+            // Guardar archivos adjuntos si los hay (en almacenamiento privado 'local')
             foreach ($archivos as $archivo) {
                 if ($archivo->isValid()) {
-                    $ruta = $archivo->store('adjuntos', 'public');
+                    $ruta = $archivo->store('adjuntos', 'local');
                     ArchivoAdjuntoTicket::create([
                         'ticket_id' => $ticket->id,
                         'usuario_id' => $cliente->id,
