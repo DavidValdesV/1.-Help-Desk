@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <form action="{{ route('login') }}" method="POST">
+        <form action="{{ route('login') }}" method="POST" data-loading-form>
             @csrf
             
             <div class="form-group">
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;" data-loading-text="Iniciando sesión...">
                 <i class="fa-solid fa-right-to-bracket"></i>
                 <span>Entrar al Sistema</span>
             </button>

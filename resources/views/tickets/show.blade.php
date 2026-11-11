@@ -62,7 +62,7 @@
                                         {{ round($adjunto->tamano_bytes / 1024, 1) }} KB &bull; Subido por {{ $adjunto->usuario->nombre }}
                                     </div>
                                 </div>
-                                <a href="{{ asset('storage/' . $adjunto->ruta) }}" target="_blank" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: var(--radius-sm);">
+                                <a href="{{ route('tickets.adjunto', $adjunto->id) }}" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: var(--radius-sm);">
                                     <i class="fa-solid fa-download"></i>
                                     <span>Ver</span>
                                 </a>
@@ -83,8 +83,8 @@
                             <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                                 @foreach($imagenes as $img)
                                     <div style="flex: 1; min-width: 150px; max-width: 260px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-card); background: rgba(0,0,0,0.15); padding: 0.5rem;">
-                                        <a href="{{ asset('storage/' . $img->ruta) }}" target="_blank" title="Ver a tamaño completo">
-                                            <img src="{{ asset('storage/' . $img->ruta) }}" alt="{{ $img->nombre_original }}" style="width: 100%; height: auto; max-height: 150px; object-fit: contain; border-radius: 4px; display: block;">
+                                        <a href="{{ route('tickets.adjunto', $img->id) }}" target="_blank" rel="noopener" title="Ver a tamaño completo">
+                                            <img src="{{ route('tickets.adjunto', $img->id) }}" alt="{{ $img->nombre_original }}" style="width: 100%; height: auto; max-height: 150px; object-fit: contain; border-radius: 4px; display: block;">
                                         </a>
                                         <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             {{ $img->nombre_original }}
@@ -167,7 +167,7 @@
 
             <!-- Comment Form -->
             @if($ticket->estado !== 'cerrado' || !auth()->user()->esCliente())
-                <form action="{{ route('comments.store', $ticket->id) }}" method="POST" style="border-top: 1px solid var(--border-card); padding-top: 1.5rem;">
+                <form action="{{ route('comments.store', $ticket->id) }}" method="POST" data-loading-form style="border-top: 1px solid var(--border-card); padding-top: 1.5rem;">
                     @csrf
                     <div class="form-group">
                         <label for="cuerpo" class="form-label">Escribir un Comentario</label>
@@ -187,7 +187,7 @@
                                 </label>
                             @endif
                         </div>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" data-loading-text="Enviando...">
                             <i class="fa-solid fa-paper-plane"></i>
                             <span>Enviar Comentario</span>
                         </button>
@@ -316,7 +316,7 @@
                             ? route('admin.tickets.updateEstado', $ticket->id) 
                             : route('tickets.updateEstado', $ticket->id);
                     @endphp
-                    <form action="{{ $postRoute }}" method="POST" id="form-estado">
+                    <form action="{{ $postRoute }}" method="POST" id="form-estado" data-loading-form>
                         @csrf
                         <div class="form-group">
                             <label for="estado" class="form-label">Cambiar Estado</label>
@@ -337,7 +337,7 @@
                             <textarea name="notas_resolucion" id="notas_resolucion" rows="3" class="form-control" placeholder="Escribe el diagnóstico final, pasos de solución y recomendaciones...">{{ $ticket->notas_resolucion }}</textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">
+                        <button type="submit" class="btn btn-primary btn-block" data-loading-text="Guardando...">
                             <i class="fa-solid fa-floppy-disk"></i>
                             <span>Guardar Cambios</span>
                         </button>

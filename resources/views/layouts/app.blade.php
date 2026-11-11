@@ -104,7 +104,7 @@
                 </div>
             @endif
 
-            @if($errors->any())
+            @if($errors->any() && !$__env->yieldContent('suppress_global_errors'))
                 <div class="alert alert-danger">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <ul class="errors-list">
@@ -121,6 +121,57 @@
     @else
         @yield('content')
     @endauth
+
+    <script>
+        // Evita envíos duplicados: en formularios con [data-loading-form] el botón
+        // se bloquea y muestra un indicador de carga mientras se procesa el envío.
+        (function () {
+            document.querySelectorAll('form[data-loading-form]').forEach(function (form) {
+                form.addEventListener('submit', function (e) {
+                    if (form.dataset.enviando === '1') {
+                        e.preventDefault();
+                        return;
+                    }
+                    form.dataset.enviando = '1';
+
+                    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
+                        btn.dataset.originalHtml = btn.innerHTML;
+                        const texto = btn.dataset.loadingText || 'Enviando...';
+                        btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span><span></span>';
+                        btn.lastElementChild.textContent = texto;
+                        btn.classList.add('is-loading');
+                        btn.setAttribute('aria-busy', 'true');
+                        // Se deshabilita en el siguiente ciclo para no cancelar el envío en curso
+                        setTimeout(function () { btn.disabled = true; }, 0);
+                    });
+
+                    // También se bloquean los demás enlaces/botones del formulario (ej. "Cancelar")
+                    form.querySelectorAll('a.btn').forEach(function (a) {
+                        a.classList.add('is-disabled');
+                        a.setAttribute('aria-disabled', 'true');
+                    });
+                });
+            });
+
+            // Si el usuario vuelve atrás con el navegador, restaurar los botones
+            window.addEventListener('pageshow', function (e) {
+                if (!e.persisted) return;
+                document.querySelectorAll('form[data-loading-form]').forEach(function (form) {
+                    form.dataset.enviando = '';
+                    form.querySelectorAll('button.is-loading').forEach(function (btn) {
+                        btn.innerHTML = btn.dataset.originalHtml || btn.innerHTML;
+                        btn.disabled = false;
+                        btn.classList.remove('is-loading');
+                        btn.removeAttribute('aria-busy');
+                    });
+                    form.querySelectorAll('a.btn.is-disabled').forEach(function (a) {
+                        a.classList.remove('is-disabled');
+                        a.removeAttribute('aria-disabled');
+                    });
+                });
+            });
+        })();
+    </script>
 
     @auth
     <script>
