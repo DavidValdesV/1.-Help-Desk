@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: helpdesk-app
+    ports:
+      - "8000:80"
+    environment:
+      APP_NAME: HelpDesk
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: ${APP_KEY}
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: helpdesk_db
+      DB_USERNAME: helpdesk
+      DB_PASSWORD: ${DOCKER_DB_PASSWORD:?Define DOCKER_DB_PASSWORD en .env}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    container_name: helpdesk-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: helpdesk_db
+      MYSQL_USER: helpdesk
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:?Define DOCKER_DB_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT_PASSWORD:?Define DOCKER_DB_ROOT_PASSWORD en .env}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - helpdesk-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uhelpdesk -p\"$$MYSQL_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  helpdesk-mysql-data:

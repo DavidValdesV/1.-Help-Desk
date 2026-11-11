@@ -26,7 +26,7 @@
             <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">Proporciona un título descriptivo y conciso.</span>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="form-grid-2">
             <div class="form-group" style="margin-bottom: 0;">
                 <label for="categoria_id" class="form-label">Categoría de Incidencia</label>
                 <select name="categoria_id" id="categoria_id" class="form-control" required>
@@ -61,7 +61,7 @@
             <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">Puedes seleccionar múltiples archivos. Máximo 10MB por archivo.</span>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-card);">
+        <div class="form-actions" style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-card);">
             <a href="{{ route('cliente.dashboard') }}" class="btn btn-secondary">Cancelar</a>
             <button type="submit" class="btn btn-primary">
                 <i class="fa-solid fa-paper-plane"></i>

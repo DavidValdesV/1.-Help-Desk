@@ -24,7 +24,11 @@ class TicketService
 
             // Generar número correlativo de ticket: TKT-YYYY-0001
             $year = now()->format('Y');
-            $count = Ticket::whereYear('created_at', now()->year)->count() + 1;
+            $ultimoNumero = Ticket::where('numero_ticket', 'like', "TKT-{$year}-%")
+                ->lockForUpdate()
+                ->orderByDesc('numero_ticket')
+                ->value('numero_ticket');
+            $count = $ultimoNumero ? ((int) substr($ultimoNumero, -4)) + 1 : 1;
             $numeroTicket = sprintf("TKT-%s-%04d", $year, $count);
 
             // Buscar técnico con la menor carga de trabajo activa
@@ -33,6 +37,8 @@ class TicketService
                 ->where('usuarios.rol', 'tecnico')
                 ->where('usuarios.activo', 1)
                 ->orderBy('carga_tecnicos.tickets_activos', 'asc')
+                ->orderBy('usuarios.id')
+                ->lockForUpdate()
                 ->select('usuarios.id', 'usuarios.nombre', 'carga_tecnicos.tickets_activos')
                 ->first();
 
@@ -109,10 +115,11 @@ class TicketService
 
     /**
      * Cambiar el estado de un ticket y actualizar la carga de trabajo del técnico asignado de forma coherente.
+     * Si $actor es null, el cambio se registra como una acción automática del sistema.
      */
-    public function cambiarEstado(Ticket $ticket, string $nuevoEstado, User $actor, ?string $notasResolucion = null, ?string $ip = null): Ticket
+    public function cambiarEstado(Ticket $ticket, string $nuevoEstado, ?User $actor, ?string $notasResolucion = null, ?string $ip = null, string $accionAuditoria = 'estado_cambiado'): Ticket
     {
-        return DB::transaction(function () use ($ticket, $nuevoEstado, $actor, $ip, $notasResolucion) {
+        return DB::transaction(function () use ($ticket, $nuevoEstado, $actor, $ip, $notasResolucion, $accionAuditoria) {
             $estadoAnterior = $ticket->estado;
 
             if ($estadoAnterior === $nuevoEstado) {
@@ -130,12 +137,6 @@ class TicketService
                         ->where('tickets_activos', '>', 0)
                         ->decrement('tickets_activos');
                 }
-
-                if ($nuevoEstado === 'resuelto') {
-                    $ticket->resolved_at = now();
-                } elseif ($nuevoEstado === 'cerrado') {
-                    $ticket->closed_at = now();
-                }
             }
             // Caso 2: Pasa de INACTIVO a ACTIVO (Reapertura)
             elseif (in_array($estadoAnterior, $estadosInactivos) && in_array($nuevoEstado, $estadosActivos)) {
@@ -149,6 +150,15 @@ class TicketService
                 if ($estadoAnterior === 'resuelto') {
                     $ticket->resolved_at = null;
                 }
+            }
+
+            // Fechas de resolución y cierre (aplica también a transiciones resuelto <-> cerrado).
+            // Al marcar como resuelto se reinicia el plazo de cierre automático.
+            if ($nuevoEstado === 'resuelto') {
+                $ticket->resolved_at = now();
+                $ticket->closed_at = null;
+            } elseif ($nuevoEstado === 'cerrado') {
+                $ticket->closed_at = now();
             }
 
             // Actualizar estado y notas
@@ -170,18 +180,52 @@ class TicketService
             $textoAnt = $estadoTextos[$estadoAnterior] ?? $estadoAnterior;
             $textoNvo = $estadoTextos[$nuevoEstado] ?? $nuevoEstado;
 
+            $nombreActor = $actor->nombre ?? 'Sistema';
+            $descripcion = $accionAuditoria === 'auto_cerrado'
+                ? "Sistema cerró automáticamente el ticket: el cliente no respondió en " . config('helpdesk.auto_cierre_minutos', 10) . " minutos tras la resolución"
+                : "{$nombreActor} cambió el estado de {$textoAnt} a {$textoNvo}";
+
             RegistroAuditoriaTicket::create([
                 'ticket_id' => $ticket->id,
-                'usuario_id' => $actor->id,
-                'accion' => 'estado_cambiado',
+                'usuario_id' => $actor?->id,
+                'accion' => $accionAuditoria,
                 'valor_anterior' => ['estado' => $estadoAnterior],
                 'valor_nuevo' => ['estado' => $nuevoEstado],
-                'descripcion' => "{$actor->nombre} cambió el estado de {$textoAnt} a {$textoNvo}",
+                'descripcion' => $descripcion,
                 'direccion_ip' => $ip,
             ]);
 
             return $ticket;
         });
+    }
+
+    /**
+     * Cierra automáticamente los tickets resueltos cuyo plazo de espera expiró
+     * sin que el cliente haya respondido. Devuelve la cantidad de tickets cerrados.
+     */
+    public function cerrarTicketsResueltosSinRespuesta(): int
+    {
+        $cerrados = 0;
+
+        Ticket::pendientesDeAutoCierre()->each(function (Ticket $ticket) use (&$cerrados) {
+            $this->cambiarEstado($ticket, 'cerrado', null, null, null, 'auto_cerrado');
+            $cerrados++;
+        });
+
+        return $cerrados;
+    }
+
+    /**
+     * Cierra un ticket puntual si su plazo de cierre automático ya expiró.
+     * Sirve como respaldo cuando el scheduler no está corriendo.
+     */
+    public function cerrarSiExpirado(Ticket $ticket): Ticket
+    {
+        if (Ticket::pendientesDeAutoCierre()->whereKey($ticket->id)->exists()) {
+            $this->cambiarEstado($ticket, 'cerrado', null, null, null, 'auto_cerrado');
+        }
+
+        return $ticket;
     }
 
     /**

@@ -100,4 +100,34 @@ class Ticket extends Model
         }
         return $this->due_at && $this->due_at->isPast();
     }
+
+    /**
+     * Fecha/hora en la que el ticket resuelto se cerrará automáticamente
+     * si el cliente no responde. Devuelve null si no aplica.
+     */
+    public function fechaAutoCierre(): ?\Illuminate\Support\Carbon
+    {
+        if ($this->estado !== 'resuelto' || !$this->resolved_at) {
+            return null;
+        }
+
+        return $this->resolved_at->copy()->addMinutes(config('helpdesk.auto_cierre_minutos', 10));
+    }
+
+    /**
+     * Tickets resueltos cuyo plazo de espera expiró y en los que el cliente
+     * no publicó ningún comentario desde la resolución.
+     */
+    public function scopePendientesDeAutoCierre($query)
+    {
+        $limite = now()->subMinutes(config('helpdesk.auto_cierre_minutos', 10));
+
+        return $query->where('estado', 'resuelto')
+            ->whereNotNull('resolved_at')
+            ->where('resolved_at', '<=', $limite)
+            ->whereDoesntHave('comentarios', function ($q) {
+                $q->whereColumn('comentarios_tickets.usuario_id', 'tickets.usuario_id')
+                  ->whereColumn('comentarios_tickets.created_at', '>=', 'tickets.resolved_at');
+            });
+    }
 }

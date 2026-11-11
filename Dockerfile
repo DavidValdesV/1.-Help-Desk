@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.4.27-apache
 
 # Instalar dependencias del sistema y extensiones PHP requeridas por Laravel
 RUN apt-get update && apt-get install -y \
@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
 RUN a2enmod rewrite
 
 # Copiar Composer desde la imagen oficial
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Instalar Node.js para compilar assets con Vite
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
 WORKDIR /var/www/html
@@ -31,10 +31,11 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/conf-available/*.conf
 
 # Instalar dependencias de PHP y compilar assets con Vite
-RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run build
+RUN composer install --optimize-autoloader
+RUN npm ci && npm run build
 
 # Ajustar permisos para las carpetas de almacenamiento y caché
+RUN php artisan storage:link
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
