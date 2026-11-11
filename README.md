@@ -43,12 +43,16 @@ Cada vez que un ticket es modificado (creación, cambio de prioridad, asignació
 - Una descripción legible para humanos.
 - La dirección IP del actor para garantizar la seguridad.
 
-### 4. Reglas de Negocio Robustas
-- **Cerrado y Bloqueo de Comentarios**: Una vez que un ticket es cerrado por el soporte, el formulario se bloquea para el cliente y el backend valida que no se puedan enviar más comentarios, evitando la reapertura descontrolada de hilos inactivos.
-- **Ajuste de Prioridad y SLA**: El soporte o administrador puede redefinir la prioridad propuesta por el cliente, lo que recalcula automáticamente el tiempo límite de resolución (SLA) a partir de la fecha de creación del ticket y registra un evento de auditoría.
-- **Galería de Evidencias Integrada**: Las imágenes y capturas de pantalla cargadas como adjuntos se previsualizan directamente en la ficha del ticket, permitiendo al soporte ver el fallo de inmediato sin descargas intermedias.
+### 4. Reglas de Negocio y Seguridad Robustas
+- **Cierre Automático por Inactividad (con Cuenta Regresiva)**: Cuando un técnico marca un ticket como **Resuelto**, se inicia automáticamente un temporizador (configurable mediante `TICKET_AUTO_CIERRE_MINUTOS`, por defecto 10 minutos) visible en tiempo real en la vista del ticket. Si el cliente no responde en ese lapso, el sistema cierra el ticket automáticamente (`tickets:cerrar-resueltos`) y registra el evento en la auditoría. Si el cliente comenta dentro del plazo, el ticket se reabre automáticamente a **En Progreso**.
+- **Cerrado y Bloqueo de Comentarios**: Una vez que un ticket es cerrado, el formulario se bloquea para el cliente y el backend valida que no se puedan enviar más comentarios, evitando la reapertura descontrolada de hilos inactivos.
+- **Ajuste de Prioridad y SLA**: El técnico asignado o el administrador pueden redefinir la prioridad propuesta por el cliente, lo que recalcula automáticamente el tiempo límite de resolución (SLA) a partir de la fecha de creación del ticket y registra un evento de auditoría.
+- **Archivos Adjuntos Privados y Galería de Evidencias**: Los adjuntos (hasta 5 archivos de 10 MB por ticket) se almacenan en disco privado y se sirven mediante una ruta autenticada (`/adjuntos/{adjunto}`) que valida que solo el cliente autor, el técnico asignado o un administrador puedan verlos o descargarlos. Las imágenes se previsualizan directamente en la ficha del ticket.
+- **Protección contra IDOR y Control de Sesiones Activas**: Validación estricta por rol y propiedad del ticket en visualización, comentarios, cambio de estado/prioridad y descargas, además de cierre inmediato de sesión si una cuenta es desactivada.
+- **Prevención de Envíos Duplicados**: Bloqueo visual del botón con animación de carga en los formularios y bloqueo atómico en el servidor (`Cache::lock`) al crear tickets para evitar duplicados por doble clic o peticiones concurrentes.
+- **Validación Intuitiva en Tiempo Real**: Para evitar tickets vacíos o sin contexto, el formulario incluye contadores dinámicos de caracteres en vivo (mínimo 8 caracteres para el asunto y 15 para la descripción) con retroalimentación visual inmediata por campo.
 - **SLA e Indicador de Vencidos**: Visualización destacada en rojo neón cuando el ticket ha superado la fecha y hora límite de resolución sin ser solventado.
-- **Validación de Calidad del Ticket**: Para evitar tickets vacíos o con palabras basura (como "asd"), el backend exige validación obligatoria de longitud mínima: al menos 8 caracteres para el asunto y 15 para el detalle del problema.
+- **Diseño Totalmente Responsivo (Móvil y Zoom Alto)**: Interfaz adaptable con menú lateral deslizable (drawer) en pantallas pequeñas o con zoom elevado (`Ctrl` + `+`), grillas flexibles y tablas desplazables.
 
 ---
 
@@ -106,6 +110,9 @@ DB_PORT=3306
 DB_DATABASE=helpdesk_db
 DB_USERNAME=root
 DB_PASSWORD=
+
+# Minutos antes de cerrar automáticamente un ticket "resuelto" sin respuesta del cliente
+TICKET_AUTO_CIERRE_MINUTOS=10
 ```
 Genera la clave de la aplicación:
 ```bash
@@ -118,14 +125,14 @@ Importa el script SQL de estructura y semillas pre-cargadas en tu servidor MySQL
 
 *Nota: Este script creará la base de datos `helpdesk_db`, sus tablas, las prioridades básicas, categorías técnicas y 8 usuarios semilla con roles listos para pruebas.*
 
-### Paso 4: Enlazar Almacenamiento y Servidor
-Crea el enlace simbólico para poder ver las capturas y archivos adjuntos de los tickets:
-```bash
-php artisan storage:link
-```
+### Paso 4: Iniciar el Servidor y el Programador de Tareas
 Inicia el servidor local de desarrollo:
 ```bash
 php artisan serve
+```
+(Opcional) Para que el cierre automático de tickets resueltos se ejecute en segundo plano cada minuto sin depender de que alguien abra el ticket, ejecuta en otra terminal:
+```bash
+php artisan schedule:work
 ```
 Abre en tu navegador la dirección: **http://127.0.0.1:8000**
 
@@ -140,7 +147,9 @@ La app queda en **http://localhost:8000** y MySQL en el puerto `3307`. Define en
 
 ## 🔑 Credenciales de Prueba (Contraseña Común: `password`)
 
-El sistema incluye usuarios pre-cargados para validar los flujos de trabajo de inmediato:
+En la pantalla de login encontrarás un acceso rápido con botones para **copiar y autorrellenar** con un clic cualquiera de las cuentas principales, además del botón para mostrar/ocultar la contraseña.
+
+El sistema incluye 8 usuarios pre-cargados en la base de datos para validar todos los flujos de trabajo:
 
 | Nombre | Rol | Correo Electrónico | Descripción de Prueba |
 |---|---|---|---|
